@@ -18,6 +18,9 @@ APP_VERSION = "0.1.0"
 MAIN_DIR = Path(__file__).resolve().parent.parent
 LOG_DIR = MAIN_DIR / "logs"
 
+USER_ACCESS_TOKEN_TEMPLATE = "ACCESS_TOKEN_"
+OAUTH_TOKEN_URL = os.getenv("OAUTH_TOKEN_URL")
+
 try:
     API_SANDBOX_MODE = int(os.getenv("API_SANDBOX_MODE", "1"))
 except (TypeError, ValueError):
