@@ -5,16 +5,27 @@ import argparse
 import logging
 import os
 
+from yadicm.api import get_campaigns
 from yadicm.config import (
     APP_NAME, APP_VERSION, OAUTH_TOKEN_URL, USER_ACCESS_TOKEN_TEMPLATE
 )
 
 
 def main():
+    logging.info("НАЧАЛО РАБОТЫ ПРОГРАММЫ...")
     args = parse_cmd_line_arguments()
     user_access_token = get_user_access_token(args.username)
     if user_access_token is None:
         return
+    if args.get:
+        get_campaigns(user_access_token, args.username)
+    elif args.resume:
+        pass
+    elif args.suspend:
+        pass
+    else:
+        logging.error("При вызове скрипта не была передана команда.")
+    logging.info("ПРОГРАММА ЗАВЕРШИЛА СВОЮ РАБОТУ.")
 
 
 def parse_cmd_line_arguments():
@@ -28,6 +39,25 @@ def parse_cmd_line_arguments():
         "username",
         type=str,
         help="Имя пользователя",
+    )
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument(
+        "-g",
+        "--get",
+        action="store_true",
+        help="Получить список кампаний",
+    )
+    group.add_argument(
+        "-r",
+        "--resume",
+        action="store_true",
+        help="Запустить кампании",
+    )
+    group.add_argument(
+        "-s",
+        "--suspend",
+        action="store_true",
+        help="Остановить кампании",
     )
     return parser.parse_args()
 
