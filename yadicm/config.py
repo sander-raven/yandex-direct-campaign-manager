@@ -15,8 +15,12 @@ load_dotenv()
 
 APP_NAME = "Yandex Direct Campaign Manager"
 APP_VERSION = "0.1.0"
+
 MAIN_DIR = Path(__file__).resolve().parent.parent
 LOG_DIR = MAIN_DIR / "logs"
+LOG_DIR.mkdir(exist_ok=True)
+FILES_DIR = MAIN_DIR / "files"
+FILES_DIR.mkdir(exist_ok=True)
 
 USER_ACCESS_TOKEN_TEMPLATE = "ACCESS_TOKEN_"
 OAUTH_TOKEN_URL = os.getenv("OAUTH_TOKEN_URL")
@@ -25,7 +29,8 @@ try:
     API_SANDBOX_MODE = int(os.getenv("API_SANDBOX_MODE", "1"))
 except (TypeError, ValueError):
     API_SANDBOX_MODE = 1
-
+API_CAMPAIGNS_URL = os.getenv("API_CAMPAIGNS_URL")
+API_SANDBOX_CAMPAIGNS_URL = os.getenv("API_SANDBOX_CAMPAIGNS_URL")
 
 logfile_name = get_logfile_name()
 
