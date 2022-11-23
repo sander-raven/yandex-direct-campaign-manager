@@ -4,12 +4,15 @@
 import logging
 from pathlib import Path
 
-from yadicm.config import FILES_DIR
+from yadicm.config import FILES_DIR, API_SANDBOX_MODE
 
 
 def get_filepath_for_user_campaigns(username: str) -> Path:
     """Get filepath for user campaigns."""
-    filename = f"{username}_campaigns_list.txt"
+    if API_SANDBOX_MODE:
+        filename = f"{username}_sandbox_campaigns_list.txt"
+    else:
+        filename = f"{username}_campaigns_list.txt"
     filepath = Path.joinpath(FILES_DIR, filename)
     return filepath
 
