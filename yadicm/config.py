@@ -60,7 +60,7 @@ LOGGING_CONFIG = {
                 "stream_handler",
                 "file_handler",
             ],
-            "level": "DEBUG",
+            "level": "INFO",
         },
     },
 }
