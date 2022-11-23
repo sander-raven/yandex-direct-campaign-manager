@@ -3,7 +3,7 @@
 
 import json
 import logging
-from pathlib import Path
+from enum import Enum
 
 import requests
 from requests.exceptions import ConnectionError
@@ -12,9 +12,31 @@ from yadicm.config import (
     API_SANDBOX_MODE,
     API_CAMPAIGNS_URL,
     API_SANDBOX_CAMPAIGNS_URL,
-    FILES_DIR,
 )
-from yadicm.helpers import write_campaigns_to_file
+from yadicm.helpers import (
+    get_filepath_for_user_campaigns,
+    read_campaigns_from_file,
+    write_campaigns_to_file,
+)
+
+
+class APIMethods(Enum):
+    """API Methods."""
+    GET = {
+        "method": "get",
+        "result": "Campaigns",
+        "ok_msg": "Идентификаторы кампаний записаны в {}.",
+    }
+    SUSPEND = {
+        "method": "suspend",
+        "result": "SuspendResults",
+        "ok_msg": "Кампании остановлены.",
+    }
+    RESUME = {
+        "method": "resume",
+        "result": "ResumeResults",
+        "ok_msg": "Кампании запущены.",
+    }
 
 
 def send_request(
@@ -71,7 +93,7 @@ def send_request(
 def get_campaigns(user_access_token: str, username: str) -> None:
     """Get campaigns list for user."""
     body = {
-        "method": "get",
+        "method": APIMethods.GET.value.get("method", ""),
         "params": {
             "SelectionCriteria": {},
             "FieldNames": ["Id", "Name"],
@@ -87,11 +109,41 @@ def get_campaigns(user_access_token: str, username: str) -> None:
             f"Информация о баллах: {units}."
         )
         result = response_json.get("result", {})
-        campaigns = result.get("Campaigns")
+        campaigns = result.get(APIMethods.GET.value.get("result"))
         if not result or not campaigns:
             logging.error("В ответе сервера API нет списка кампаний.")
             return
-        filename = f"{username}_campaigns_list.txt"
-        filepath = Path.joinpath(FILES_DIR, filename)
+        filepath = get_filepath_for_user_campaigns(username)
         write_campaigns_to_file(campaigns, filepath)
-        logging.info(f"Идентификаторы кампаний записаны в {filepath}.")
+        logging.info(APIMethods.GET.value.get("ok_msg", "{}").format(filepath))
+
+
+def change_campaigns_state(
+    user_access_token: str, username: str, api_method: APIMethods
+) -> None:
+    """Suspend user's campaigns."""
+    filepath = get_filepath_for_user_campaigns(username)
+    campaigns = read_campaigns_from_file(filepath)
+    body = {
+        "method": api_method.value.get("method", ""),
+        "params": {
+            "SelectionCriteria": {
+                "Ids": campaigns
+            },
+        }
+    }
+    response = send_request(user_access_token, body)
+    if response:
+        response_json = response.json()
+        request_id = response.headers.get("RequestId", False)
+        units = response.headers.get("Units", False)
+        logging.debug(
+            f"RequestId: {request_id}.\n"
+            f"Информация о баллах: {units}."
+        )
+        result = response_json.get("result", {})
+        result_list = result.get(api_method.value.get("result"))
+        if not result or not result_list:
+            logging.error("В ответе сервера API нет результатов выполнения.")
+        else:
+            logging.info(api_method.value.get("ok_msg"))

@@ -5,7 +5,11 @@ import argparse
 import logging
 import os
 
-from yadicm.api import get_campaigns
+from yadicm.api import (
+    APIMethods,
+    get_campaigns,
+    change_campaigns_state,
+)
 from yadicm.config import (
     APP_NAME, APP_VERSION, OAUTH_TOKEN_URL, USER_ACCESS_TOKEN_TEMPLATE
 )
@@ -20,9 +24,17 @@ def main():
     if args.get:
         get_campaigns(user_access_token, args.username)
     elif args.resume:
-        pass
+        change_campaigns_state(
+            user_access_token,
+            args.username,
+            APIMethods.RESUME,
+        )
     elif args.suspend:
-        pass
+        change_campaigns_state(
+            user_access_token,
+            args.username,
+            APIMethods.SUSPEND,
+        )
     else:
         logging.error("При вызове скрипта не была передана команда.")
     logging.info("ПРОГРАММА ЗАВЕРШИЛА СВОЮ РАБОТУ.")

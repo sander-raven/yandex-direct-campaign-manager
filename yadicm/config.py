@@ -1,13 +1,12 @@
 """Application configuration file."""
 
 
+from datetime import datetime
 import logging.config
 import os
 from pathlib import Path
 
 from dotenv import load_dotenv
-
-from yadicm.helpers import get_logfile_name
 
 
 load_dotenv()
@@ -32,7 +31,7 @@ except (TypeError, ValueError):
 API_CAMPAIGNS_URL = os.getenv("API_CAMPAIGNS_URL")
 API_SANDBOX_CAMPAIGNS_URL = os.getenv("API_SANDBOX_CAMPAIGNS_URL")
 
-logfile_name = get_logfile_name()
+logfile_name = "yadicm_" + datetime.now().strftime("%Y_%m") + ".log"
 
 LOGGING_CONFIG = {
     "version": 1,
